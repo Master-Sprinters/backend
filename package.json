@@ -1,7 +1,7 @@
 {
   "name": "hardhat-tut",
   "version": "1.0.0",
-  "description": "",
+  "description": "backend code of our project",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,5 +11,16 @@
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^1.0.2",
     "hardhat": "^2.10.1"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Master-Sprinters/backend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Master-Sprinters/backend/issues"
+  },
+  "homepage": "https://github.com/Master-Sprinters/backend#readme"
 }
