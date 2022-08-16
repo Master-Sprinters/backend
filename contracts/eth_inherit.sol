@@ -15,6 +15,8 @@ contract Eth_Inherit {
 
     address private admin; 
 
+    enum Roles{ ADMIN, PARENT, CHILD }
+
     constructor()  {
         admin = msg.sender;
     }
@@ -49,17 +51,6 @@ contract Eth_Inherit {
         parentObject.surname = surname;
     }
 
-    function getParent() public view returns(Parent memory result) {
-        // EKLE: eğer adminse herkesinkini görmeli, değilse sadece kendininkini
-        Parent storage parent = parents[msg.sender]; 
-        result = parent;
-    }
-    function getChild() public view returns (Child memory result){
-        //EKLE: çocuk sadece kendi bilgilerini görebilmeli parent ve admin bütün çocukların bilgilerini görebilmeli
-        Child storage child = children[msg.sender]; 
-        result = child;
-    }
-
     function addChild(address payable childAddress, string memory name, string memory surname) public {
         // releaseTime ve balance başka metotta
         // sadece parent yapabilir
@@ -84,6 +75,17 @@ contract Eth_Inherit {
         // EKLE: childrenAddress'e çocuk adresi eklemesi
     }
 
+    function getParent() public view returns(Parent memory result) {
+        // EKLE: eğer adminse herkesinkini görmeli, değilse sadece kendininkini
+        Parent storage parent = parents[msg.sender]; 
+        result = parent;
+    }
+    function getChild() public view returns(Child memory result) {
+        // EKLE: çocuk sadece kendi bilgilerini görebilmeli parent ve admin bütün çocukların bilgilerini görebilmeli
+        Child storage child = children[msg.sender]; 
+        result = child;
+    }
+
     // smart contracta para yollama metodu
     function sendMoneytoContract(address childAddress, uint256 releaseTime, uint256 amount) public payable {
         address owner = msg.sender;
@@ -100,14 +102,47 @@ contract Eth_Inherit {
 
     }
 
-    /*function getRoles (address roleAddress) public view returns(string){
-
-    }
+/*     function getRole(address roleAddress) public view returns(Roles _type) {
+        if (parents[roleAddress] != Parent(address(0),"","",[])) {
+            _type = Roles.PARENT;
+        }
+        else if (children[roleAddress] != Child(address(0),"","",0,0,address(0))) {
+            _type = Roles.CHILD;
+        }
+        else if (roleAddress == admin) {
+            _type = Roles.ADMIN;
+        }
+    } */
+    
+    /*
     function isWalletinThere (address askedAddress,address[] childrenAddresses,address payable _address){
         mapping(address =>bool) public _Addresses;
 
         
-    }*/
+    } 
+    */
+    
     // smart contracttan para çekme metodu/metotları
+
+    function withdrawMoney(uint amount) public {
+        address personAddress = payable(msg.sender);
+        string memory role;
+        // Roles role = getRole(person); 
+
+        // parent için 
+        if(role == "") {
+            (bool sent, bytes memory data) = personAddress.call{value: amount}("");
+            require(sent, "Failed to send Ether");
+        }
+
+        // çocuk için
+        else if(role == "") {
+            // EKLE: releaseTime'a bakacak, tarih geçmişse izin verecek, geçmemişse hata
+            // balance değerini gönderecek
+            // !! mapping'i güncelleyecek, çocuğu silecek
+        }
+    }
+
+    // EKLE: çocuğun miktarı düzenleme metodu
 
 }
