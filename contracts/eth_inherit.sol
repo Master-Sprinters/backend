@@ -27,6 +27,7 @@ contract Eth_Inherit {
         string surname;
         // sonradan mapping yapabiliriz
         address[] childrenAddresses;
+        bool isValue;
     }
 
     struct Child {
@@ -37,6 +38,7 @@ contract Eth_Inherit {
         uint256 releaseTime;
         uint256 balance;
         address parentAddress;
+        bool isValue;
     }
 
     mapping (address => Parent) private parents;
@@ -49,6 +51,7 @@ contract Eth_Inherit {
         parentObject._address = _address;
         parentObject.name = name;
         parentObject.surname = surname;
+        parentObject.isValue = true;
     }
 
     function addChild(address payable childAddress, string memory name, string memory surname) public {
@@ -60,18 +63,18 @@ contract Eth_Inherit {
         
         // EKLE: burayı düzelt çok kötü (modifier mıdır event midir ona çevir)
         // metodu çağıran ebeveyn sistemde var mı?
-        Parent storage parentObject = parents[parentAddress];
-        require((parentObject._address != address(0)), "Parent not in system.");
-        
-        // eklenecek çocuk sistemde var mı?
+        // Parent storage parentObject = parents[parentAddress];
+        require(parents[parentAddress].isValue, "Parent not in system.");
+
+        // eklenecek çocuk sistemde var mı?        
+        require(!(children[childAddress].isValue), "Child already in system.");
+
         Child storage childObject = children[childAddress];
-        require((childObject._address == address(0)), "Child already in system.");
-        
         childObject._address = childAddress;
         childObject.name = name;
         childObject.surname = surname;
-
         childObject.parentAddress = parentAddress;
+        childObject.isValue = true;
         // EKLE: childrenAddress'e çocuk adresi eklemesi
     }
 
@@ -80,12 +83,14 @@ contract Eth_Inherit {
         Parent storage parent = parents[msg.sender]; 
         result = parent;
     }
+    
     function getChild() public view returns(Child memory result) {
         // EKLE: çocuk sadece kendi bilgilerini görebilmeli parent ve admin bütün çocukların bilgilerini görebilmeli
         Child storage child = children[msg.sender]; 
         result = child;
     }
 
+   
     // smart contracta para yollama metodu
     function sendMoneytoContract(address childAddress, uint256 releaseTime, uint256 amount) public payable {
         address owner = msg.sender;
@@ -130,10 +135,10 @@ contract Eth_Inherit {
         // Roles role = getRole(person); 
 
         // parent için 
-        if(role == "") {
-            (bool sent, bytes memory data) = personAddress.call{value: amount}("");
-            require(sent, "Failed to send Ether");
-        }
+        // if(role == "") {
+        //     (bool sent, bytes memory data) = personAddress.call{value: amount}("");
+        //     require(sent, "Failed to send Ether");
+        // }
 
         // çocuk için
         else if(role == "") {
