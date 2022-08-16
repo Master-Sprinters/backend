@@ -54,6 +54,11 @@ contract Eth_Inherit {
         Parent storage parent = parents[msg.sender]; 
         result = parent;
     }
+    function getChild() public view returns (Child memory result){
+        //EKLE: çocuk sadece kendi bilgilerini görebilmeli parent ve admin bütün çocukların bilgilerini görebilmeli
+        Child storage child = children[msg.sender]; 
+        result = child;
+    }
 
     function addChild(address payable childAddress, string memory name, string memory surname) public {
         // releaseTime ve balance başka metotta
@@ -81,6 +86,11 @@ contract Eth_Inherit {
 
     // smart contracta para yollama metodu
     function sendMoneytoContract(address childAddress, uint256 releaseTime, uint256 amount) public payable {
+        address owner = msg.sender;
+        Child storage _child = children[childAddress];
+        _child.releaseTime = releaseTime;
+        _child.balance= amount;
+        
         /* 
             EKLE: 
             çocuk sistemde var mı?
@@ -90,6 +100,14 @@ contract Eth_Inherit {
 
     }
 
+    function getRoles (address roleAddress) public view returns(string){
+        if(roleAddress )
+    }
+    function isWalletinThere (address askedAddress,address[] childrenAddresses,address payable _address){
+        mapping(address =>bool) public _Addresses;
+        
+        
+    }
     // smart contracttan para çekme metodu/metotları
 
 }
