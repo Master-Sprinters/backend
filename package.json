@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/Master-Sprinters/backend/issues"
   },
-  "homepage": "https://github.com/Master-Sprinters/backend#readme"
+  "homepage": "https://github.com/Master-Sprinters/backend#readme",
+  "dependencies": {
+    "save-dev": "^0.0.1-security"
+  }
 }

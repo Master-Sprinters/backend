@@ -100,14 +100,14 @@ contract Eth_Inherit {
 
     }
 
-    function getRoles (address roleAddress) public view returns(string){
-        if(roleAddress )
+    /*function getRoles (address roleAddress) public view returns(string){
+
     }
     function isWalletinThere (address askedAddress,address[] childrenAddresses,address payable _address){
         mapping(address =>bool) public _Addresses;
+
         
-        
-    }
+    }*/
     // smart contracttan para çekme metodu/metotları
 
 }
