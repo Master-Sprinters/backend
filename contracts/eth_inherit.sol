@@ -11,7 +11,7 @@ testleri typescript ile yaz */
 
 // SOR: kullanıcı site dışında kontratla iletişime geçemez mi?? (remixle mesela)
 
-contract Admin_and_Parent {
+contract Eth_Inherit {
 
     address private admin; 
 
@@ -57,6 +57,7 @@ contract Admin_and_Parent {
 
     function addChild(address payable childAddress, string memory name, string memory surname) public {
         // releaseTime ve balance başka metotta
+        // sadece parent yapabilir
         
         // metodu çağıran ebeveynin adresini al
         address parentAddress = msg.sender;
