@@ -15,7 +15,7 @@ contract Eth_Inherit {
 
     address private admin; 
 
-    enum Roles{ ADMIN, PARENT, CHILD }
+    enum Roles{ ADMIN, PARENT, CHILD, UNREGISTERED }
 
     constructor()  {
         admin = msg.sender;
@@ -27,6 +27,7 @@ contract Eth_Inherit {
         string surname;
         // sonradan mapping yapabiliriz
         address[] childrenAddresses;
+        // kişinin sistemde olup olmadığını gösteren bool
         bool isValue;
     }
 
@@ -116,6 +117,9 @@ contract Eth_Inherit {
         }
         else if (roleAddress == admin) {
             _type = Roles.ADMIN;
+        }
+        else {
+            _type = Roles.UNREGISTERED;
         }
     }
     
