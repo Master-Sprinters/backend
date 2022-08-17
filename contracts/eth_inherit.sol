@@ -17,6 +17,8 @@ contract Eth_Inherit {
 
     enum Roles{ ADMIN, PARENT, CHILD, UNREGISTERED }
 
+    // isValue yerine 0 
+
     constructor()  {
         admin = msg.sender;
     }
@@ -48,11 +50,11 @@ contract Eth_Inherit {
     mapping (address => Child) private children;
     address[] private parentsArray;
 
-    // herkes çağırabilir
     function addParent(address payable _address, string memory name, string memory surname) public {
         require(getRole(msg.sender) != Roles.CHILD && getRole(msg.sender) != Roles.PARENT);
+        
         Parent storage parentObject = parents[_address]; 
-        require(!(parents[_address].isValue), "Parent already in system.");
+        require((parents[_address]._address != address(0)), "Parent already in system.");
         parentObject._address = _address;
         parentObject.name = name;
         parentObject.surname = surname;
@@ -94,10 +96,13 @@ contract Eth_Inherit {
         }
     }
 
-    function getAllParents() public view returns(address[] memory result) {
+    function getAllParents() public view returns(Parent[] memory result) {
         // Sadece admin icin, butun parentlari doner
         require(getRole(msg.sender) == Roles.ADMIN, "You are not an admin.");
-        result = parentsArray;
+        result = new Parent[](parentsArray.length); 
+        for (uint i = 0; i < parentsArray.length; i++) {
+            result[i] = parents[parentsArray[i]];
+        }
     }
     
     function getChild() public view returns(Child memory result) {
@@ -107,30 +112,30 @@ contract Eth_Inherit {
     }
 
     // smart contracta para yollama metodu
-    function sendMoneytoContract(address childAddress, uint256 releaseTime, uint256 amount) public payable {
+    function sendMoneytoContract(address childAddress, uint256 releaseTime) public payable {
         address owner = msg.sender;
         Child storage _child = children[childAddress];
         _child.releaseTime = releaseTime;
-        _child.balance= amount;
+        _child.balance= msg.value;
         
         /* 
             EKLE: 
             çocuk sistemde var mı?
-            releaseTime kontrolü (tarih ileri bir tarih mi?)
+            releaseTime kontrolü (tarih ileri bir tarih mi?) 
             gönderilen para yeterli mi? 
         */
 
     }
 
     function getRole(address roleAddress) public view returns(Roles _type) {
-        if (parents[roleAddress].isValue) {
+        if (roleAddress == admin) {
+            _type = Roles.ADMIN;
+        }
+        else if (parents[roleAddress].isValue) {
             _type = Roles.PARENT;
         }
         else if (children[roleAddress].isValue) {
             _type = Roles.CHILD;
-        }
-        else if (roleAddress == admin) {
-            _type = Roles.ADMIN;
         }
         else {
             _type = Roles.UNREGISTERED;
@@ -147,12 +152,14 @@ contract Eth_Inherit {
     
     // smart contracttan para çekme metodu/metotları
 
+    // EKLE: ikiye ayır
     function withdrawMoney(uint amount) public {
         address personAddress = payable(msg.sender);
         Roles role = getRole(personAddress); 
 
         // parent için 
         if(role == Roles.PARENT) {
+            // çocuktaki çektiği para yeterli olmalı
             (bool sent, bytes memory data) = personAddress.call{value: amount}("");
             require(sent, "Failed to send Ether");
         }

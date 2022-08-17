@@ -1,8 +1,13 @@
+import '@nomiclabs/hardhat-ethers'
 import { ethers } from "hardhat";
 const { expect } = require("chai");
 
 // consola bunu yaz:
 // npx hardhat test
+
+// before each()
+// before()
+
 describe("Main eth inherit contract", function () {
   it("Should return the role of the person as admin", async function () {
     const [owner] = await ethers.getSigners();
