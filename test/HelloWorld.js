@@ -1,4 +1,4 @@
-const { expect } = require("chai");
+/* const { expect } = require("chai");
 
 describe("Getter setter contract", function () {
   it("Should display the text", async function () {
@@ -9,3 +9,4 @@ describe("Getter setter contract", function () {
     expect(gettedText).to.equal("Hello World !");
   });
 });
+ */

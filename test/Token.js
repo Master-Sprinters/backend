@@ -1,4 +1,4 @@
-const { expect } = require("chai");
+/* const { expect } = require("chai");
 
 describe("Token contract", function () {
   it("Deployment should assign the total supply of tokens to the owner", async function () {
@@ -12,3 +12,4 @@ describe("Token contract", function () {
     expect(await hardhatToken.totalSupply()).to.equal(ownerBalance);
   });
 });
+ */

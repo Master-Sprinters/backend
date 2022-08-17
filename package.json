@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/Master-Sprinters/backend#readme",
   "dependencies": {
+    "ethers": "^5.6.9",
     "save-dev": "^0.0.1-security"
   }
 }

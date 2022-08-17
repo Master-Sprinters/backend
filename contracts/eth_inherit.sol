@@ -107,17 +107,17 @@ contract Eth_Inherit {
 
     }
 
-/*     function getRole(address roleAddress) public view returns(Roles _type) {
-        if (parents[roleAddress] != Parent(address(0),"","",[])) {
+    function getRole(address roleAddress) public view returns(Roles _type) {
+        if (parents[roleAddress].isValue) {
             _type = Roles.PARENT;
         }
-        else if (children[roleAddress] != Child(address(0),"","",0,0,address(0))) {
+        else if (children[roleAddress].isValue) {
             _type = Roles.CHILD;
         }
         else if (roleAddress == admin) {
             _type = Roles.ADMIN;
         }
-    } */
+    }
     
     /*
     function isWalletinThere (address askedAddress,address[] childrenAddresses,address payable _address){
@@ -131,17 +131,16 @@ contract Eth_Inherit {
 
     function withdrawMoney(uint amount) public {
         address personAddress = payable(msg.sender);
-        string memory role;
-        // Roles role = getRole(person); 
+        Roles role = getRole(personAddress); 
 
         // parent için 
-        // if(role == "") {
-        //     (bool sent, bytes memory data) = personAddress.call{value: amount}("");
-        //     require(sent, "Failed to send Ether");
-        // }
+        if(role == Roles.PARENT) {
+            (bool sent, bytes memory data) = personAddress.call{value: amount}("");
+            require(sent, "Failed to send Ether");
+        }
 
         // çocuk için
-        else if(role == "") {
+        else if(role == Roles.CHILD) {
             // EKLE: releaseTime'a bakacak, tarih geçmişse izin verecek, geçmemişse hata
             // balance değerini gönderecek
             // !! mapping'i güncelleyecek, çocuğu silecek
