@@ -14,7 +14,7 @@ testleri typescript ile yaz */
 contract Eth_Inherit {
 
     address private admin; 
-
+    
     enum Roles{ ADMIN, PARENT, CHILD }
 
     constructor()  {
@@ -28,6 +28,7 @@ contract Eth_Inherit {
         // sonradan mapping yapabiliriz
         address[] childrenAddresses;
         bool isValue;
+        Roles role;
     }
 
     struct Child {
@@ -39,28 +40,33 @@ contract Eth_Inherit {
         uint256 balance;
         address parentAddress;
         bool isValue;
+        Roles role;
     }
 
     mapping (address => Parent) private parents;
     mapping (address => Child) private children;
+    address[] private parentsArray;
 
     // herkes çağırabilir
     function addParent(address payable _address, string memory name, string memory surname) public {
+        require(getRole(msg.sender) != Roles.CHILD && getRole(msg.sender) != Roles.PARENT);
         Parent storage parentObject = parents[_address]; 
-        require((parentObject._address == address(0)), "Parent already in system.");
+        require(!(parents[_address].isValue), "Parent already in system.");
         parentObject._address = _address;
         parentObject.name = name;
         parentObject.surname = surname;
         parentObject.isValue = true;
+        parentObject.role = Roles.PARENT;
+        parentsArray.push(_address);
     }
 
     function addChild(address payable childAddress, string memory name, string memory surname) public {
         // releaseTime ve balance başka metotta
         // sadece parent yapabilir
+        require(getRole(msg.sender) == Roles.PARENT, "You are not a parent.");
         
         // metodu çağıran ebeveynin adresini al
         address parentAddress = msg.sender;
-        
         // EKLE: burayı düzelt çok kötü (modifier mıdır event midir ona çevir)
         // metodu çağıran ebeveyn sistemde var mı?
         // Parent storage parentObject = parents[parentAddress];
@@ -75,13 +81,22 @@ contract Eth_Inherit {
         childObject.surname = surname;
         childObject.parentAddress = parentAddress;
         childObject.isValue = true;
-        // EKLE: childrenAddress'e çocuk adresi eklemesi
+        childObject.role = Roles.CHILD;
+        parents[parentAddress].childrenAddresses.push(childAddress);
     }
 
     function getParent() public view returns(Parent memory result) {
-        // EKLE: eğer adminse herkesinkini görmeli, değilse sadece kendininkini
-        Parent storage parent = parents[msg.sender]; 
-        result = parent;
+        if(getRole(msg.sender) == Roles.PARENT) {
+            result = parents[msg.sender];
+        } else {
+            result = parents[children[msg.sender].parentAddress] ;
+        }
+    }
+
+    function getAllParents() public view returns(address[] memory result) {
+        // Sadece admin icin, butun parentlari doner
+        require(getRole(msg.sender) == Roles.ADMIN, "You are not an admin.");
+        result = parentsArray;
     }
     
     function getChild() public view returns(Child memory result) {
@@ -90,7 +105,6 @@ contract Eth_Inherit {
         result = child;
     }
 
-   
     // smart contracta para yollama metodu
     function sendMoneytoContract(address childAddress, uint256 releaseTime, uint256 amount) public payable {
         address owner = msg.sender;
