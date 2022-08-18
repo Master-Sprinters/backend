@@ -54,7 +54,7 @@ contract Eth_Inherit {
     }
 
     function addChild(address payable childAddress, string memory name, string memory surname) public {
-        // releaseTime ve balance başka metotta
+        // releaseTime ve balance eklenmeli
         // sadece parent yapabilir
         require(getRole(msg.sender) == Roles.PARENT, "You are not a parent.");
         
@@ -114,7 +114,7 @@ contract Eth_Inherit {
     }
 
     function getChild() public view returns(Child memory result) {
-        // EKLE: çocuk sadece kendi bilgilerini görebilmeli parent bütün çocuklarının bilgilerini görebilmeli
+        // EKLE: çocuk sadece kendi bilgilerini görebilmeli
         Child storage child = children[msg.sender]; 
         result = child;
     }
@@ -131,6 +131,7 @@ contract Eth_Inherit {
             çocuk sistemde var mı?
             releaseTime kontrolü (tarih ileri bir tarih mi?) 
             gönderilen para yeterli mi? 
+            BURAYI addChild'a ekle
         */
 
     }
@@ -158,7 +159,7 @@ contract Eth_Inherit {
         require(getRole(personAddress) == Roles.CHILD, "User not a child.");
         Child storage childObject = children[personAddress];
         
-        // EKLE: if tarih geçmiş ise
+        // EKLE: if tarih geçmiş ise (bool döndüren bir fonksiyon yazabiliriz)
         if(true){
             (bool sent, bytes memory data) = personAddress.call{value: childObject.balance}("");
             require(sent, "Failed to send Ether");
@@ -174,13 +175,12 @@ contract Eth_Inherit {
             
             // tamamen silme
             delete children[personAddress];
-            // EKLE: childAddress array'inden silme   
-
         }
     }
     
-    function editChildBalance() public payable {
+    function editChildInfo(address childAddress) public payable {
         // EKLE: balance'da çıkarma veya ekleme hesabını bizim yapmamız lazım (msg.value kullanabilmek için)
+        // tarih değiştirme (ileri bir tarih olmalı)
         // sadece parent yapabilir
         // parent'ın çektiği paranın balance'dan daha büyük olmaması lazım
         // parentWithdraw() çağır
