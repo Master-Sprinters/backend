@@ -7,13 +7,13 @@ event
 openzeppelin 
 */
 
+// SOR: childrenAddresses'dan silme olayı
+
 contract Eth_Inherit {
 
     address private admin; 
 
     enum Roles{ ADMIN, PARENT, CHILD, UNREGISTERED }
-
-    // isValue yerine 0 
 
     constructor()  {
         admin = msg.sender;
@@ -85,16 +85,36 @@ contract Eth_Inherit {
 
     function getAllParents() public view returns(Parent[] memory result) {
         // Sadece admin icin, butun parentlari doner
-        // !!!!!!!!!!!!!! aslında Roles.ADMIN yerine direkt admin'in adresine eşitleyebiliriz
         require(getRole(msg.sender) == Roles.ADMIN, "You are not an admin.");
         result = new Parent[](parentsArray.length); 
         for (uint i = 0; i < parentsArray.length; i++) {
             result[i] = parents[parentsArray[i]];
         }
     }
-    
+
+    function getChildren(address parentAddress) public view returns(Child[] memory result) {
+        // Sadece admin icin, bir parent'ın bütün çocuklarını döner
+        require(getRole(msg.sender) == Roles.ADMIN, "You are not an admin.");
+
+        address[] memory childrenAddressArray = parents[parentAddress].childrenAddresses;
+        result = new Child[](childrenAddressArray.length); 
+        for (uint i = 0; i < childrenAddressArray.length; i++) {
+            result[i] = children[childrenAddressArray[i]];
+        }
+    }
+
+    function getChildrenAsParent() public view returns(Child[] memory result) {
+        // Sadece parent için, kendi çocuklarından oluşan bir array döner
+        require(getRole(msg.sender) == Roles.PARENT, "You are not a parent.");
+        Parent memory parentObject = parents[msg.sender];
+        result = new Child[](parentObject.childrenAddresses.length);
+        for (uint i = 0; i < parentObject.childrenAddresses.length; i++) {
+            result[i] = children[parentObject.childrenAddresses[i]];
+        }
+    }
+
     function getChild() public view returns(Child memory result) {
-        // EKLE: çocuk sadece kendi bilgilerini görebilmeli parent ve admin bütün çocukların bilgilerini görebilmeli
+        // EKLE: çocuk sadece kendi bilgilerini görebilmeli parent bütün çocuklarının bilgilerini görebilmeli
         Child storage child = children[msg.sender]; 
         result = child;
     }
@@ -142,16 +162,35 @@ contract Eth_Inherit {
         if(true){
             (bool sent, bytes memory data) = personAddress.call{value: childObject.balance}("");
             require(sent, "Failed to send Ether");
-            // balance değişkenini sıfırlıyor
-            delete childObject.balance;
-            // bunu yapınca getRole artık çocuğu algılamıyor
-            delete childObject._address;
+            
+            // childrenAddresses'den çocuğu silme
+            address _parentAddress = childObject.parentAddress;
+            address[] storage array = parents[_parentAddress].childrenAddresses; 
+            for (uint i = 0; i < array.length; i++) {
+                if (array[i] == personAddress) {
+                    delete parents[_parentAddress].childrenAddresses[i];
+                }
+            }
+            
+            // tamamen silme
+            delete children[personAddress];
+            // EKLE: childAddress array'inden silme   
+
         }
+    }
+    
+    function editChildBalance() public payable {
+        // EKLE: balance'da çıkarma veya ekleme hesabını bizim yapmamız lazım (msg.value kullanabilmek için)
+        // sadece parent yapabilir
+        // parent'ın çektiği paranın balance'dan daha büyük olmaması lazım
+        // parentWithdraw() çağır
     }
 
     function parentWithdraw(uint amount) public {
         // çocuktaki çektiği para yeterli olmalı
         address personAddress = payable(msg.sender);
+        require(getRole(personAddress) == Roles.PARENT, "User not a parent.");
+        
         (bool sent, bytes memory data) = personAddress.call{value: amount}("");
         require(sent, "Failed to send Ether");
     }
