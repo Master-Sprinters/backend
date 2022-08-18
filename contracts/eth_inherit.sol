@@ -4,12 +4,8 @@ pragma solidity ^0.8.16;
 
 /* modifier
 event
-tarih veritipi nasıl tutulur
 openzeppelin 
-
-testleri typescript ile yaz */
-
-// SOR: kullanıcı site dışında kontratla iletişime geçemez mi?? (remixle mesela)
+*/
 
 contract Eth_Inherit {
 
@@ -30,8 +26,6 @@ contract Eth_Inherit {
         // sonradan mapping yapabiliriz
         address[] childrenAddresses;
         // kişinin sistemde olup olmadığını gösteren bool
-        bool isValue;
-        Roles role;
     }
 
     struct Child {
@@ -42,8 +36,6 @@ contract Eth_Inherit {
         uint256 releaseTime;
         uint256 balance;
         address parentAddress;
-        bool isValue;
-        Roles role;
     }
 
     mapping (address => Parent) private parents;
@@ -58,8 +50,6 @@ contract Eth_Inherit {
         parentObject._address = _address;
         parentObject.name = name;
         parentObject.surname = surname;
-        parentObject.isValue = true;
-        parentObject.role = Roles.PARENT;
         parentsArray.push(_address);
     }
 
@@ -70,21 +60,18 @@ contract Eth_Inherit {
         
         // metodu çağıran ebeveynin adresini al
         address parentAddress = msg.sender;
-        // EKLE: burayı düzelt çok kötü (modifier mıdır event midir ona çevir)
+
         // metodu çağıran ebeveyn sistemde var mı?
-        // Parent storage parentObject = parents[parentAddress];
-        require(parents[parentAddress].isValue, "Parent not in system.");
+        require(parents[parentAddress]._address == address(0), "Parent not in system.");
 
         // eklenecek çocuk sistemde var mı?        
-        require(!(children[childAddress].isValue), "Child already in system.");
+        require(!(children[childAddress]._address != address(0)), "Child already in system.");
 
         Child storage childObject = children[childAddress];
         childObject._address = childAddress;
         childObject.name = name;
         childObject.surname = surname;
         childObject.parentAddress = parentAddress;
-        childObject.isValue = true;
-        childObject.role = Roles.CHILD;
         parents[parentAddress].childrenAddresses.push(childAddress);
     }
 
@@ -98,6 +85,7 @@ contract Eth_Inherit {
 
     function getAllParents() public view returns(Parent[] memory result) {
         // Sadece admin icin, butun parentlari doner
+        // !!!!!!!!!!!!!! aslında Roles.ADMIN yerine direkt admin'in adresine eşitleyebiliriz
         require(getRole(msg.sender) == Roles.ADMIN, "You are not an admin.");
         result = new Parent[](parentsArray.length); 
         for (uint i = 0; i < parentsArray.length; i++) {
@@ -127,51 +115,44 @@ contract Eth_Inherit {
 
     }
 
-    function getRole(address roleAddress) public view returns(Roles _type) {
+    // çocuk sonradan parent olursa aşağıdaki sıraya göre ZATEN ilk olarak parent dönecektir !
+    function getRole(address roleAddress) public view returns(Roles) {
         if (roleAddress == admin) {
-            _type = Roles.ADMIN;
+            return(Roles.ADMIN);
         }
-        else if (parents[roleAddress].isValue) {
-            _type = Roles.PARENT;
+        else if (parents[roleAddress]._address != address(0)) {
+            return(Roles.PARENT);
         }
-        else if (children[roleAddress].isValue) {
-            _type = Roles.CHILD;
+        else if (children[roleAddress]._address != address(0)) {
+            return(Roles.CHILD);
         }
         else {
-            _type = Roles.UNREGISTERED;
+            return(Roles.UNREGISTERED);
         }
     }
     
-    /*
-    function isWalletinThere (address askedAddress,address[] childrenAddresses,address payable _address){
-        mapping(address =>bool) public _Addresses;
+    // smart contracttan para çekme metotları
 
-        
-    } 
-    */
-    
-    // smart contracttan para çekme metodu/metotları
-
-    // EKLE: ikiye ayır
-    function withdrawMoney(uint amount) public {
+    function childWithdraw() public {
         address personAddress = payable(msg.sender);
-        Roles role = getRole(personAddress); 
-
-        // parent için 
-        if(role == Roles.PARENT) {
-            // çocuktaki çektiği para yeterli olmalı
-            (bool sent, bytes memory data) = personAddress.call{value: amount}("");
+        require(getRole(personAddress) == Roles.CHILD, "User not a child.");
+        Child storage childObject = children[personAddress];
+        
+        // EKLE: if tarih geçmiş ise
+        if(true){
+            (bool sent, bytes memory data) = personAddress.call{value: childObject.balance}("");
             require(sent, "Failed to send Ether");
-        }
-
-        // çocuk için
-        else if(role == Roles.CHILD) {
-            // EKLE: releaseTime'a bakacak, tarih geçmişse izin verecek, geçmemişse hata
-            // balance değerini gönderecek
-            // !! mapping'i güncelleyecek, çocuğu silecek
+            // balance değişkenini sıfırlıyor
+            delete childObject.balance;
+            // bunu yapınca getRole artık çocuğu algılamıyor
+            delete childObject._address;
         }
     }
 
-    // EKLE: çocuğun miktarı düzenleme metodu
-
+    function parentWithdraw(uint amount) public {
+        // çocuktaki çektiği para yeterli olmalı
+        address personAddress = payable(msg.sender);
+        (bool sent, bytes memory data) = personAddress.call{value: amount}("");
+        require(sent, "Failed to send Ether");
+    }
 }
