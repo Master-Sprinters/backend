@@ -11,7 +11,7 @@ async function main() {
     const Token = await ethers.getContractFactory("Eth_Inherit");
     const token = await Token.deploy();
   
-    console.log("Token address:", token.address);
+    console.log("Contract address:", token.address);
   }
   
   main()
