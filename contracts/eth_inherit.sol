@@ -153,17 +153,7 @@ contract Eth_Inherit {
             (bool sent, bytes memory data) = personAddress.call{value: childObject.balance}("");
             require(sent, "Failed to send Ether");
             
-            // childrenAddresses'den çocuğu silme
-            address _parentAddress = childObject.parentAddress;
-            address[] storage array = parents[_parentAddress].childrenAddresses; 
-            for (uint i = 0; i < array.length; i++) {
-                if (array[i] == personAddress) {
-                    delete parents[_parentAddress].childrenAddresses[i];
-                }
-            }
-            
-            // tamamen silme
-            delete children[personAddress];
+            deleteChild(personAddress);
         }
     }
     
@@ -182,5 +172,26 @@ contract Eth_Inherit {
         
         (bool sent, bytes memory data) = personAddress.call{value: amount}("");
         require(sent, "Failed to send Ether");
+    }
+
+    // bir çocuğu sistemden siler VE parayı ebeveyne geri gönderir.
+    // EKLE: sadece çocuğun ebeveyni bu metodu çağırabilir.
+    function cancelChild(address childAddress) public {
+
+    }
+
+    // bir çocuğu sistemden siler. 
+    function deleteChild(address childAddress) private {
+        // childrenAddresses'den çocuğu silme
+        Child memory childObject = children[childAddress];
+        address _parentAddress = childObject.parentAddress;
+        for (uint i = 0; i < parents[_parentAddress].childrenAddresses.length; i++) {
+            if (parents[_parentAddress].childrenAddresses[i] == childAddress) {
+                delete parents[_parentAddress].childrenAddresses[i];
+            }
+        }
+            
+        // tamamen silme
+        delete children[childAddress];
     }
 }
