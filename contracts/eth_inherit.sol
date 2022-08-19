@@ -45,7 +45,7 @@ contract Eth_Inherit {
         require(getRole(msg.sender) != Roles.CHILD && getRole(msg.sender) != Roles.PARENT);
         
         Parent storage parentObject = parents[_address]; 
-        require((parents[_address]._address != address(0)), "Parent already in system.");
+        require((parents[_address]._address == address(0)), "Parent already in system.");
         parentObject._address = _address;
         parentObject.name = name;
         parentObject.surname = surname;
@@ -66,10 +66,10 @@ contract Eth_Inherit {
         address parentAddress = msg.sender;
 
         // metodu çağıran ebeveyn sistemde var mı?
-        require(parents[parentAddress]._address == address(0), "Parent not in system.");
+        require(parents[parentAddress]._address != address(0), "Parent not in system.");
 
         // eklenecek çocuk sistemde var mı?        
-        require((children[childAddress]._address != address(0)), "Child already in system.");
+        require((children[childAddress]._address == address(0)), "Child already in system.");
 
         Child storage childObject = children[childAddress];
         childObject._address = childAddress;
