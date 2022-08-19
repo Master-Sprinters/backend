@@ -23,9 +23,8 @@ contract Eth_Inherit {
         address payable _address;
         string name;
         string surname;
-        // sonradan mapping yapabiliriz
+        // ebeveynin çocuklarının tutulduğu array
         address[] childrenAddresses;
-        // kişinin sistemde olup olmadığını gösteren bool
     }
 
     struct Child {
@@ -53,8 +52,13 @@ contract Eth_Inherit {
         parentsArray.push(_address);
     }
 
-    function addChild(address payable childAddress, string memory name, string memory surname) public {
-        // releaseTime ve balance eklenmeli
+    function addChild(address payable childAddress, string memory name, string memory surname, uint256 releaseTime) public payable {
+        /*         
+        EKLE: 
+        releaseTime kontrolü (tarih ileri bir tarih mi?) 
+        gönderilen para yeterli mi? 
+        */ 
+        
         // sadece parent yapabilir
         require(getRole(msg.sender) == Roles.PARENT, "You are not a parent.");
         
@@ -65,13 +69,15 @@ contract Eth_Inherit {
         require(parents[parentAddress]._address == address(0), "Parent not in system.");
 
         // eklenecek çocuk sistemde var mı?        
-        require(!(children[childAddress]._address != address(0)), "Child already in system.");
+        require((children[childAddress]._address != address(0)), "Child already in system.");
 
         Child storage childObject = children[childAddress];
         childObject._address = childAddress;
         childObject.name = name;
         childObject.surname = surname;
         childObject.parentAddress = parentAddress;
+        childObject.releaseTime = releaseTime;
+        childObject.balance= msg.value;
         parents[parentAddress].childrenAddresses.push(childAddress);
     }
 
@@ -117,23 +123,6 @@ contract Eth_Inherit {
         // EKLE: çocuk sadece kendi bilgilerini görebilmeli
         Child storage child = children[msg.sender]; 
         result = child;
-    }
-
-    // smart contracta para yollama metodu
-    function sendMoneytoContract(address childAddress, uint256 releaseTime) public payable {
-        address owner = msg.sender;
-        Child storage _child = children[childAddress];
-        _child.releaseTime = releaseTime;
-        _child.balance= msg.value;
-        
-        /* 
-            EKLE: 
-            çocuk sistemde var mı?
-            releaseTime kontrolü (tarih ileri bir tarih mi?) 
-            gönderilen para yeterli mi? 
-            BURAYI addChild'a ekle
-        */
-
     }
 
     // çocuk sonradan parent olursa aşağıdaki sıraya göre ZATEN ilk olarak parent dönecektir !
