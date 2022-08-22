@@ -7,8 +7,6 @@ event
 openzeppelin 
 */
 
-// SOR: childrenAddresses'dan silme olayı
-
 contract Eth_Inherit {
 
     address private admin; 
@@ -120,7 +118,7 @@ contract Eth_Inherit {
     }
 
     function getChild() public view returns(Child memory result) {
-        // EKLE: çocuk sadece kendi bilgilerini görebilmeli
+        require(getRole(msg.sender) == Roles.CHILD, "You are not a child.");
         Child storage child = children[msg.sender]; 
         result = child;
     }
@@ -175,9 +173,16 @@ contract Eth_Inherit {
     }
 
     // bir çocuğu sistemden siler VE parayı ebeveyne geri gönderir.
-    // EKLE: sadece çocuğun ebeveyni bu metodu çağırabilir.
+    // SOR: güvenlik iyi mi bunda??
     function cancelChild(address childAddress) public {
+        address personAddress = payable(msg.sender);
+        // metodu çağıran kişi silmek istediği çocuğun ebeveyni olmalı 
+        require(personAddress == children[childAddress].parentAddress);
 
+        (bool sent, bytes memory data) = personAddress.call{value: children[childAddress].balance}("");
+        require(sent, "Failed to send Ether");
+
+        deleteChild(childAddress);
     }
 
     // bir çocuğu sistemden siler. 
