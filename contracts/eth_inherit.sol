@@ -29,8 +29,8 @@ contract Eth_Inherit {
         address payable _address;
         string name;
         string surname;
-        // releasetime veya birthdate
-        uint256 releaseTime;
+        // releaseDate veya birthdate
+        uint256 releaseDate;
         uint256 balance;
         address parentAddress;
     }
@@ -50,13 +50,8 @@ contract Eth_Inherit {
         parentsArray.push(_address);
     }
 
-    function addChild(address payable childAddress, string memory name, string memory surname, uint256 releaseTime) public payable {
-        /*         
-        EKLE: 
-        releaseTime kontrolü (tarih ileri bir tarih mi?) 
-        gönderilen para yeterli mi? 
-        */ 
-        
+    function addChild(address payable childAddress, string memory name, string memory surname, uint256 releaseDate) public payable {
+
         // sadece parent yapabilir
         require(getRole(msg.sender) == Roles.PARENT, "You are not a parent.");
         
@@ -70,11 +65,13 @@ contract Eth_Inherit {
         require((children[childAddress]._address == address(0)), "Child already in system.");
 
         Child storage childObject = children[childAddress];
+        // ters mantık (tuhaf)
+        require(!dateCheck(childObject.releaseDate));
         childObject._address = childAddress;
         childObject.name = name;
         childObject.surname = surname;
         childObject.parentAddress = parentAddress;
-        childObject.releaseTime = releaseTime;
+        childObject.releaseDate = releaseDate;
         childObject.balance= msg.value;
         parents[parentAddress].childrenAddresses.push(childAddress);
     }
@@ -105,6 +102,12 @@ contract Eth_Inherit {
         for (uint i = 0; i < childrenAddressArray.length; i++) {
             result[i] = children[childrenAddressArray[i]];
         }
+    }
+
+    // kontrattaki toplam parayı gösterir
+    function seeContractBalance() public view returns(uint contractBalance) {
+        require(getRole(msg.sender) == Roles.ADMIN, "You are not an admin.");
+        contractBalance = address(this).balance;
     }
 
     function getChildrenAsParent() public view returns(Child[] memory result) {
@@ -146,8 +149,7 @@ contract Eth_Inherit {
         require(getRole(personAddress) == Roles.CHILD, "User not a child.");
         Child storage childObject = children[personAddress];
         
-        // EKLE: if tarih geçmiş ise (bool döndüren bir fonksiyon yazabiliriz)
-        if(true){
+        if(dateCheck(childObject.releaseDate)){
             (bool sent, bytes memory data) = personAddress.call{value: childObject.balance}("");
             require(sent, "Failed to send Ether");
             
@@ -163,7 +165,7 @@ contract Eth_Inherit {
         // parentWithdraw() çağır
     }
 
-    function parentWithdraw(uint amount) public {
+    function parentWithdraw(uint amount) private {
         // çocuktaki çektiği para yeterli olmalı
         address personAddress = payable(msg.sender);
         require(getRole(personAddress) == Roles.PARENT, "User not a parent.");
@@ -198,5 +200,9 @@ contract Eth_Inherit {
             
         // tamamen silme
         delete children[childAddress];
+    }
+
+    function dateCheck(uint releaseDate) private view returns(bool) {
+        return (block.timestamp > releaseDate);
     }
 }
