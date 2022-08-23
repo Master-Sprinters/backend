@@ -66,7 +66,7 @@ contract Eth_Inherit {
 
         Child storage childObject = children[childAddress];
         // ters mantık (tuhaf)
-        require(!dateCheck(childObject.releaseDate));
+        require(!dateCheck(releaseDate));
         childObject._address = childAddress;
         childObject.name = name;
         childObject.surname = surname;
