@@ -157,21 +157,28 @@ contract Eth_Inherit {
         }
     }
     
-    function editChildInfo(address childAddress) public payable {
-        // EKLE: balance'da çıkarma veya ekleme hesabını bizim yapmamız lazım (msg.value kullanabilmek için)
-        // tarih değiştirme (ileri bir tarih olmalı)
-        // sadece parent yapabilir
-        // parent'ın çektiği paranın balance'dan daha büyük olmaması lazım
-        // parentWithdraw() çağır
+    
+    function changeReleaseDate(address childAddress,uint256 _releaseDate) public {
+        address personAddress = payable(msg.sender);
+        require(personAddress == children[childAddress].parentAddress);
+        require(!dateCheck(_releaseDate)); // TODO: event olarak degistir
+        children[childAddress].releaseDate = _releaseDate;
     }
 
-    function parentWithdraw(uint amount) private {
+    function parentDeposit(address childAddress) public payable{
+        address personAddress = payable(msg.sender);
+        require(personAddress == children[childAddress].parentAddress);
+        children[childAddress].balance += msg.value;
+    }
+
+    function parentWithdraw(address childAddress, uint amount) public {
         // çocuktaki çektiği para yeterli olmalı
         address personAddress = payable(msg.sender);
-        require(getRole(personAddress) == Roles.PARENT, "User not a parent.");
-        
+        require(personAddress == children[childAddress].parentAddress);
+        require(children[childAddress].balance >= amount);
         (bool sent, bytes memory data) = personAddress.call{value: amount}("");
         require(sent, "Failed to send Ether");
+        children[childAddress].balance -= amount;
     }
 
     // bir çocuğu sistemden siler VE parayı ebeveyne geri gönderir.
