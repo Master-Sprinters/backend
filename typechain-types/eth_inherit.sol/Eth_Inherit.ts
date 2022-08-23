@@ -43,7 +43,7 @@ export declare namespace Eth_Inherit {
     _address: PromiseOrValue<string>;
     name: PromiseOrValue<string>;
     surname: PromiseOrValue<string>;
-    releaseTime: PromiseOrValue<BigNumberish>;
+    releaseDate: PromiseOrValue<BigNumberish>;
     balance: PromiseOrValue<BigNumberish>;
     parentAddress: PromiseOrValue<string>;
   };
@@ -59,7 +59,7 @@ export declare namespace Eth_Inherit {
     _address: string;
     name: string;
     surname: string;
-    releaseTime: BigNumber;
+    releaseDate: BigNumber;
     balance: BigNumber;
     parentAddress: string;
   };
@@ -69,30 +69,38 @@ export interface Eth_InheritInterface extends utils.Interface {
   functions: {
     "addChild(address,string,string,uint256)": FunctionFragment;
     "addParent(address,string,string)": FunctionFragment;
+    "cancelChild(address)": FunctionFragment;
+    "changeReleaseDate(address,uint256)": FunctionFragment;
     "childWithdraw()": FunctionFragment;
-    "editChildInfo(address)": FunctionFragment;
     "getAllParents()": FunctionFragment;
     "getChild()": FunctionFragment;
+    "getChildBalance(address)": FunctionFragment;
     "getChildren(address)": FunctionFragment;
     "getChildrenAsParent()": FunctionFragment;
     "getParent()": FunctionFragment;
     "getRole(address)": FunctionFragment;
-    "parentWithdraw(uint256)": FunctionFragment;
+    "parentDeposit(address)": FunctionFragment;
+    "parentWithdraw(address,uint256)": FunctionFragment;
+    "seeContractBalance()": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
       | "addChild"
       | "addParent"
+      | "cancelChild"
+      | "changeReleaseDate"
       | "childWithdraw"
-      | "editChildInfo"
       | "getAllParents"
       | "getChild"
+      | "getChildBalance"
       | "getChildren"
       | "getChildrenAsParent"
       | "getParent"
       | "getRole"
+      | "parentDeposit"
       | "parentWithdraw"
+      | "seeContractBalance"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -113,18 +121,26 @@ export interface Eth_InheritInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "childWithdraw",
-    values?: undefined
+    functionFragment: "cancelChild",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "editChildInfo",
-    values: [PromiseOrValue<string>]
+    functionFragment: "changeReleaseDate",
+    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "childWithdraw",
+    values?: undefined
   ): string;
   encodeFunctionData(
     functionFragment: "getAllParents",
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "getChild", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "getChildBalance",
+    values: [PromiseOrValue<string>]
+  ): string;
   encodeFunctionData(
     functionFragment: "getChildren",
     values: [PromiseOrValue<string>]
@@ -139,18 +155,30 @@ export interface Eth_InheritInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
+    functionFragment: "parentDeposit",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "parentWithdraw",
-    values: [PromiseOrValue<BigNumberish>]
+    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "seeContractBalance",
+    values?: undefined
   ): string;
 
   decodeFunctionResult(functionFragment: "addChild", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "addParent", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "childWithdraw",
+    functionFragment: "cancelChild",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "editChildInfo",
+    functionFragment: "changeReleaseDate",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "childWithdraw",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -158,6 +186,10 @@ export interface Eth_InheritInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getChild", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getChildBalance",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "getChildren",
     data: BytesLike
@@ -169,7 +201,15 @@ export interface Eth_InheritInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "getParent", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getRole", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "parentDeposit",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "parentWithdraw",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "seeContractBalance",
     data: BytesLike
   ): Result;
 
@@ -207,7 +247,7 @@ export interface Eth_Inherit extends BaseContract {
       childAddress: PromiseOrValue<string>,
       name: PromiseOrValue<string>,
       surname: PromiseOrValue<string>,
-      releaseTime: PromiseOrValue<BigNumberish>,
+      releaseDate: PromiseOrValue<BigNumberish>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -218,13 +258,19 @@ export interface Eth_Inherit extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    childWithdraw(
+    cancelChild(
+      childAddress: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    editChildInfo(
+    changeReleaseDate(
       childAddress: PromiseOrValue<string>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+      _releaseDate: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    childWithdraw(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     getAllParents(
@@ -242,6 +288,11 @@ export interface Eth_Inherit extends BaseContract {
         result: Eth_Inherit.ChildStructOutput;
       }
     >;
+
+    getChildBalance(
+      childAddress: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { balance: BigNumber }>;
 
     getChildren(
       parentAddress: PromiseOrValue<string>,
@@ -273,17 +324,27 @@ export interface Eth_Inherit extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[number]>;
 
+    parentDeposit(
+      childAddress: PromiseOrValue<string>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     parentWithdraw(
+      childAddress: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    seeContractBalance(
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { contractBalance: BigNumber }>;
   };
 
   addChild(
     childAddress: PromiseOrValue<string>,
     name: PromiseOrValue<string>,
     surname: PromiseOrValue<string>,
-    releaseTime: PromiseOrValue<BigNumberish>,
+    releaseDate: PromiseOrValue<BigNumberish>,
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -294,13 +355,19 @@ export interface Eth_Inherit extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  childWithdraw(
+  cancelChild(
+    childAddress: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  editChildInfo(
+  changeReleaseDate(
     childAddress: PromiseOrValue<string>,
-    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    _releaseDate: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  childWithdraw(
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   getAllParents(
@@ -308,6 +375,11 @@ export interface Eth_Inherit extends BaseContract {
   ): Promise<Eth_Inherit.ParentStructOutput[]>;
 
   getChild(overrides?: CallOverrides): Promise<Eth_Inherit.ChildStructOutput>;
+
+  getChildBalance(
+    childAddress: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
   getChildren(
     parentAddress: PromiseOrValue<string>,
@@ -325,17 +397,25 @@ export interface Eth_Inherit extends BaseContract {
     overrides?: CallOverrides
   ): Promise<number>;
 
+  parentDeposit(
+    childAddress: PromiseOrValue<string>,
+    overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   parentWithdraw(
+    childAddress: PromiseOrValue<string>,
     amount: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
+
+  seeContractBalance(overrides?: CallOverrides): Promise<BigNumber>;
 
   callStatic: {
     addChild(
       childAddress: PromiseOrValue<string>,
       name: PromiseOrValue<string>,
       surname: PromiseOrValue<string>,
-      releaseTime: PromiseOrValue<BigNumberish>,
+      releaseDate: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -346,18 +426,29 @@ export interface Eth_Inherit extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    childWithdraw(overrides?: CallOverrides): Promise<void>;
-
-    editChildInfo(
+    cancelChild(
       childAddress: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    changeReleaseDate(
+      childAddress: PromiseOrValue<string>,
+      _releaseDate: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    childWithdraw(overrides?: CallOverrides): Promise<void>;
 
     getAllParents(
       overrides?: CallOverrides
     ): Promise<Eth_Inherit.ParentStructOutput[]>;
 
     getChild(overrides?: CallOverrides): Promise<Eth_Inherit.ChildStructOutput>;
+
+    getChildBalance(
+      childAddress: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     getChildren(
       parentAddress: PromiseOrValue<string>,
@@ -377,10 +468,18 @@ export interface Eth_Inherit extends BaseContract {
       overrides?: CallOverrides
     ): Promise<number>;
 
+    parentDeposit(
+      childAddress: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     parentWithdraw(
+      childAddress: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    seeContractBalance(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   filters: {};
@@ -390,7 +489,7 @@ export interface Eth_Inherit extends BaseContract {
       childAddress: PromiseOrValue<string>,
       name: PromiseOrValue<string>,
       surname: PromiseOrValue<string>,
-      releaseTime: PromiseOrValue<BigNumberish>,
+      releaseDate: PromiseOrValue<BigNumberish>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -401,18 +500,29 @@ export interface Eth_Inherit extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    childWithdraw(
+    cancelChild(
+      childAddress: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    editChildInfo(
+    changeReleaseDate(
       childAddress: PromiseOrValue<string>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+      _releaseDate: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    childWithdraw(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     getAllParents(overrides?: CallOverrides): Promise<BigNumber>;
 
     getChild(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getChildBalance(
+      childAddress: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     getChildren(
       parentAddress: PromiseOrValue<string>,
@@ -428,10 +538,18 @@ export interface Eth_Inherit extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    parentDeposit(
+      childAddress: PromiseOrValue<string>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     parentWithdraw(
+      childAddress: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
+
+    seeContractBalance(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -439,7 +557,7 @@ export interface Eth_Inherit extends BaseContract {
       childAddress: PromiseOrValue<string>,
       name: PromiseOrValue<string>,
       surname: PromiseOrValue<string>,
-      releaseTime: PromiseOrValue<BigNumberish>,
+      releaseDate: PromiseOrValue<BigNumberish>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -450,18 +568,29 @@ export interface Eth_Inherit extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    childWithdraw(
+    cancelChild(
+      childAddress: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    editChildInfo(
+    changeReleaseDate(
       childAddress: PromiseOrValue<string>,
-      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+      _releaseDate: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    childWithdraw(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     getAllParents(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getChild(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getChildBalance(
+      childAddress: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     getChildren(
       parentAddress: PromiseOrValue<string>,
@@ -479,9 +608,19 @@ export interface Eth_Inherit extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    parentDeposit(
+      childAddress: PromiseOrValue<string>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     parentWithdraw(
+      childAddress: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    seeContractBalance(
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };
 }
