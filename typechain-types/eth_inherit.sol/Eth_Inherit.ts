@@ -74,7 +74,6 @@ export interface Eth_InheritInterface extends utils.Interface {
     "childWithdraw()": FunctionFragment;
     "getAllParents()": FunctionFragment;
     "getChild()": FunctionFragment;
-    "getChildBalance(address)": FunctionFragment;
     "getChildren(address)": FunctionFragment;
     "getChildrenAsParent()": FunctionFragment;
     "getParent()": FunctionFragment;
@@ -93,7 +92,6 @@ export interface Eth_InheritInterface extends utils.Interface {
       | "childWithdraw"
       | "getAllParents"
       | "getChild"
-      | "getChildBalance"
       | "getChildren"
       | "getChildrenAsParent"
       | "getParent"
@@ -137,10 +135,6 @@ export interface Eth_InheritInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "getChild", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "getChildBalance",
-    values: [PromiseOrValue<string>]
-  ): string;
   encodeFunctionData(
     functionFragment: "getChildren",
     values: [PromiseOrValue<string>]
@@ -186,10 +180,6 @@ export interface Eth_InheritInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "getChild", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "getChildBalance",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "getChildren",
     data: BytesLike
@@ -289,11 +279,6 @@ export interface Eth_Inherit extends BaseContract {
       }
     >;
 
-    getChildBalance(
-      childAddress: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber] & { balance: BigNumber }>;
-
     getChildren(
       parentAddress: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -376,11 +361,6 @@ export interface Eth_Inherit extends BaseContract {
 
   getChild(overrides?: CallOverrides): Promise<Eth_Inherit.ChildStructOutput>;
 
-  getChildBalance(
-    childAddress: PromiseOrValue<string>,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
-
   getChildren(
     parentAddress: PromiseOrValue<string>,
     overrides?: CallOverrides
@@ -444,11 +424,6 @@ export interface Eth_Inherit extends BaseContract {
     ): Promise<Eth_Inherit.ParentStructOutput[]>;
 
     getChild(overrides?: CallOverrides): Promise<Eth_Inherit.ChildStructOutput>;
-
-    getChildBalance(
-      childAddress: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
 
     getChildren(
       parentAddress: PromiseOrValue<string>,
@@ -519,11 +494,6 @@ export interface Eth_Inherit extends BaseContract {
 
     getChild(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getChildBalance(
-      childAddress: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
     getChildren(
       parentAddress: PromiseOrValue<string>,
       overrides?: CallOverrides
@@ -586,11 +556,6 @@ export interface Eth_Inherit extends BaseContract {
     getAllParents(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     getChild(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    getChildBalance(
-      childAddress: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
 
     getChildren(
       parentAddress: PromiseOrValue<string>,
