@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "C:\\Users\\PC\\Desktop\\backend\\contracts\\eth_inherit.sol": {
-      "lastModificationDate": 1661256822441,
-      "contentHash": "b2c54fde087794501ded3598a2e7e67d",
+      "lastModificationDate": 1661494107511,
+      "contentHash": "31c45a3bd02287b00f9c3dbc42c727c7",
       "sourceName": "contracts/eth_inherit.sol",
       "solcConfig": {
         "version": "0.8.16",
