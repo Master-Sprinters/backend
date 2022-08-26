@@ -67,7 +67,7 @@ contract Eth_Inherit {
 
         Child storage childObject = children[childAddress];
         // ters mantık, testi yapıldı çalışıyor
-        require(!dateCheck(releaseDate), unicode"Tarih geçersiz.");
+        require(!dateCheck(releaseDate), unicode"Geçersiz tarih.");
         childObject._address = childAddress;
         childObject.name = name;
         childObject.surname = surname;
@@ -167,7 +167,7 @@ contract Eth_Inherit {
     function changeReleaseDate(address childAddress,uint256 _releaseDate) public {
         address personAddress = payable(msg.sender);
         require(personAddress == children[childAddress].parentAddress, unicode"Bu çocuğun ebeveyni siz değilsiniz.");
-        require(!dateCheck(_releaseDate), "Date is before now."); // TODO: event olarak degistir
+        require(!dateCheck(_releaseDate), unicode"Geçersiz tarih."); // TODO: event olarak degistir
         children[childAddress].releaseDate = _releaseDate;
     }
 
