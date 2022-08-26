@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// 
 
 pragma solidity ^0.8.16;
 
@@ -40,10 +41,10 @@ contract Eth_Inherit {
     address[] private parentsArray;
 
     function addParent(address payable _address, string memory name, string memory surname) public {
-        require(getRole(msg.sender) != Roles.CHILD && getRole(msg.sender) != Roles.PARENT, "User a child or parent.");
+        require(getRole(msg.sender) != Roles.CHILD && getRole(msg.sender) != Roles.PARENT, unicode"Kullanıcı bir ebeveyn veya çocuk.");
         
         Parent storage parentObject = parents[_address]; 
-        require((parentObject._address == address(0)), "Parent already in system.");
+        require((parentObject._address == address(0)), unicode"Ebeveyn zaten sistemde var.");
         parentObject._address = _address;
         parentObject.name = name;
         parentObject.surname = surname;
@@ -53,20 +54,20 @@ contract Eth_Inherit {
     function addChild(address payable childAddress, string memory name, string memory surname, uint256 releaseDate) public payable {
 
         // sadece parent yapabilir
-        require(getRole(msg.sender) == Roles.PARENT, "You are not a parent.");
+        require(getRole(msg.sender) == Roles.PARENT, unicode"Ebeveyn değilsiniz.");
         
         // metodu çağıran ebeveynin adresini al
         address parentAddress = msg.sender;
 
         // metodu çağıran ebeveyn sistemde var mı?
-        require(parents[parentAddress]._address != address(0), "Parent not in system.");
+        require(parents[parentAddress]._address != address(0), unicode"Ebeveyn sistemde yok.");
 
         // eklenecek çocuk sistemde var mı?        
-        require((children[childAddress]._address == address(0)), "Child already in system.");
+        require((children[childAddress]._address == address(0)), unicode"Çocuk sistemde zaten var.");
 
         Child storage childObject = children[childAddress];
         // ters mantık, testi yapıldı çalışıyor
-        require(!dateCheck(releaseDate), "Date is before now.");
+        require(!dateCheck(releaseDate), unicode"Tarih geçersiz.");
         childObject._address = childAddress;
         childObject.name = name;
         childObject.surname = surname;
@@ -86,7 +87,7 @@ contract Eth_Inherit {
 
     function getAllParents() public view returns(Parent[] memory result) {
         // Sadece admin icin, butun parentlari doner
-        require(getRole(msg.sender) == Roles.ADMIN, "You are not an admin.");
+        require(getRole(msg.sender) == Roles.ADMIN, unicode"Admin değilsiniz.");
         result = new Parent[](parentsArray.length); 
         for (uint i = 0; i < parentsArray.length; i++) {
             result[i] = parents[parentsArray[i]];
@@ -95,7 +96,7 @@ contract Eth_Inherit {
 
     function getChildren(address parentAddress) public view returns(Child[] memory result) {
         // Sadece admin icin, bir parent'ın bütün çocuklarını döner
-        require(getRole(msg.sender) == Roles.ADMIN, "You are not an admin.");
+        require(getRole(msg.sender) == Roles.ADMIN, unicode"Admin değilsiniz.");
 
         address[] memory childrenAddressArray = parents[parentAddress].childrenAddresses;
         result = new Child[](childrenAddressArray.length); 
@@ -110,13 +111,13 @@ contract Eth_Inherit {
 
     // kontrattaki toplam parayı gösterir
     function seeContractBalance() public view returns(uint contractBalance) {
-        require(getRole(msg.sender) == Roles.ADMIN, "You are not an admin.");
+        require(getRole(msg.sender) == Roles.ADMIN, unicode"Admin değilsiniz.");
         contractBalance = address(this).balance;
     }
 
     function getChildrenAsParent() public view returns(Child[] memory result) {
         // Sadece parent için, kendi çocuklarından oluşan bir array döner
-        require(getRole(msg.sender) == Roles.PARENT, "You are not a parent.");
+        require(getRole(msg.sender) == Roles.PARENT, unicode"Ebeveyn değilsiniz.");
         Parent memory parentObject = parents[msg.sender];
         result = new Child[](parentObject.childrenAddresses.length);
         for (uint i = 0; i < parentObject.childrenAddresses.length; i++) {
@@ -125,7 +126,7 @@ contract Eth_Inherit {
     }
 
     function getChild() public view returns(Child memory result) {
-        require(getRole(msg.sender) == Roles.CHILD, "You are not a child.");
+        require(getRole(msg.sender) == Roles.CHILD, unicode"Çocuk değilsiniz.");
         Child storage child = children[msg.sender]; 
         result = child;
     }
@@ -150,13 +151,13 @@ contract Eth_Inherit {
 
     function childWithdraw() public {
         address personAddress = payable(msg.sender);
-        require(getRole(personAddress) == Roles.CHILD, "User not a child.");
+        require(getRole(personAddress) == Roles.CHILD, unicode"Çocuk değilsiniz.");
         Child storage childObject = children[personAddress];
         
-        require(dateCheck(childObject.releaseDate), "Release date not passed.");
+        require(dateCheck(childObject.releaseDate), unicode"Kilit tarihi geçilmemiştir.");
 
         (bool sent, bytes memory data) = personAddress.call{value: childObject.balance}("");
-        require(sent, "Failed to send Ether");
+        require(sent, unicode"Ether gönderilemedi.");
             
         deleteChild(personAddress);
         
@@ -165,24 +166,24 @@ contract Eth_Inherit {
     
     function changeReleaseDate(address childAddress,uint256 _releaseDate) public {
         address personAddress = payable(msg.sender);
-        require(personAddress == children[childAddress].parentAddress, "You are not the parent.");
+        require(personAddress == children[childAddress].parentAddress, unicode"Bu çocuğun ebeveyni siz değilsiniz.");
         require(!dateCheck(_releaseDate), "Date is before now."); // TODO: event olarak degistir
         children[childAddress].releaseDate = _releaseDate;
     }
 
     function parentDeposit(address childAddress) public payable{
         address personAddress = payable(msg.sender);
-        require(personAddress == children[childAddress].parentAddress, "You are not the parent.");
+        require(personAddress == children[childAddress].parentAddress, unicode"Bu çocuğun ebeveyni siz değilsiniz.");
         children[childAddress].balance += msg.value;
     }
 
     function parentWithdraw(address childAddress, uint amount) public {
         // çocuktaki çektiği para yeterli olmalı
         address personAddress = payable(msg.sender);
-        require(personAddress == children[childAddress].parentAddress, "You are not the parent.");
-        require(children[childAddress].balance >= amount, "Not enough money in child.");
+        require(personAddress == children[childAddress].parentAddress, unicode"Bu çocuğun ebeveyni siz değilsiniz.");
+        require(children[childAddress].balance >= amount, unicode"Çocuk hesabında yeterli para yok.");
         (bool sent, bytes memory data) = personAddress.call{value: amount}("");
-        require(sent, "Failed to send Ether");
+        require(sent, unicode"Ether gönderilemedi.");
         children[childAddress].balance -= amount;
     }
 
@@ -191,10 +192,10 @@ contract Eth_Inherit {
     function cancelChild(address childAddress) public {
         address personAddress = payable(msg.sender);
         // metodu çağıran kişi silmek istediği çocuğun ebeveyni olmalı 
-        require(personAddress == children[childAddress].parentAddress, "You are not the parent.");
+        require(personAddress == children[childAddress].parentAddress, unicode"Bu çocuğun ebeveyni siz değilsiniz.");
 
         (bool sent, bytes memory data) = personAddress.call{value: children[childAddress].balance}("");
-        require(sent, "Failed to send Ether");
+        require(sent, unicode"Ether gönderilemedi.");
 
         deleteChild(childAddress);
     }
