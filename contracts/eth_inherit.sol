@@ -153,12 +153,13 @@ contract Eth_Inherit {
         require(getRole(personAddress) == Roles.CHILD, "User not a child.");
         Child storage childObject = children[personAddress];
         
-        if(dateCheck(childObject.releaseDate)){
-            (bool sent, bytes memory data) = personAddress.call{value: childObject.balance}("");
-            require(sent, "Failed to send Ether");
+        require(dateCheck(childObject.releaseDate), "Release date not passed.");
+
+        (bool sent, bytes memory data) = personAddress.call{value: childObject.balance}("");
+        require(sent, "Failed to send Ether");
             
-            deleteChild(personAddress);
-        }
+        deleteChild(personAddress);
+        
     }
     
     
